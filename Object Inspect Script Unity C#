@@ -1,0 +1,91 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+// this scripts by yasindev9
+public class inspectManager : MonoBehaviour
+{
+    public float distance;
+    public Transform playerSocket;
+
+    Vector3 originalPos;
+    Vector3 birakmaPos;
+    bool onInspect = false;
+    bool thisObjectGetTrue = true;
+    GameObject inspected;
+    public playerController playerScript;
+    public mouseLook mousebakıs;
+    public Image cross;
+    public TextMeshProUGUI inspectUI;
+    public GameObject inspectUIParent;
+
+
+    private void Update()
+    {
+        Vector3 fwd = transform.TransformDirection(Vector3.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(transform.position, fwd, out hit, distance))
+        {
+            if (hit.transform.tag == "retrievableObject" || hit.transform.tag == "Object" && !onInspect)
+            {
+                cross.color = new Color32(255, 0, 0, 255);
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+
+                    inspected = hit.transform.gameObject;
+                    originalPos = hit.transform.position;
+                    onInspect = true;
+                    cross.color = new Color32(0, 0, 0, 255);
+                    StartCoroutine(pickupItem());
+                }
+
+            }
+            else
+            {
+                cross.color = new Color32(0, 0, 0, 255);
+            }
+        
+        }
+
+
+        if (onInspect)
+        {
+            inspected.transform.position = Vector3.Lerp(inspected.transform.position, playerSocket.position, 0.2f);
+            playerSocket.Rotate(new Vector3(Input.GetAxis("Mouse Y"), -Input.GetAxis("Mouse X"), 0) * Time.deltaTime * 500f);
+
+        }
+        else if (inspected != null)
+        {
+            inspected.transform.SetParent(null);
+            inspected.transform.position = Vector3.Lerp(inspected.transform.position, originalPos, 0.2f);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Mouse1) && onInspect)
+        {
+            StartCoroutine(dropItem());
+            onInspect = false;
+        }
+        textChange();
+
+    }
+
+
+    IEnumerator pickupItem()
+    {
+        playerScript.enabled = false;
+        mousebakıs.enabled = false;
+        yield return new WaitForSeconds(0.2f);
+        inspected.transform.SetParent(playerSocket);
+    }
+    IEnumerator dropItem()
+    {
+        inspected.transform.rotation = Quaternion.identity;
+        yield return new WaitForSeconds(0.2f);
+        playerScript.enabled = true;
+        mousebakıs.enabled = true;
+    }
+
+    
+}
