@@ -67,8 +67,7 @@ public class inspectManager : MonoBehaviour
             StartCoroutine(dropItem());
             onInspect = false;
         }
-        textChange();
-
+  
     }
 
 
